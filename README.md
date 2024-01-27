@@ -1,4 +1,4 @@
-# A Figlet module for Neorg
+# A module for Neorg
 
 This is a module for Neorg that allows you to easily create folders, .norg files, and insert links to these files directly in your Neorg documents using a prompt.
 
