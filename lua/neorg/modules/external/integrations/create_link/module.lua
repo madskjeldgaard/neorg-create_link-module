@@ -5,14 +5,19 @@ local module = neorg.modules.create('external.integrations.create_link')
 module.setup = function()
   return {
     success = true,
-    requires = { "core.neorgcmd", "core.keybinds", "core.ui"  },
+    requires = { "core.neorgcmd", "core.keybinds", "core.ui" },
   }
 end
 
 module.create_and_link = function(relativePath)
+
   -- Parsing folder and filename
   local folderPath, fileName = relativePath:match("^(.-)/([^/]-)$")
-  if not folderPath or not fileName then
+
+  folderPath = folderPath or ""
+  fileName = fileName or ""
+
+  if not folderPath and not fileName then
     print("Invalid path")
     return
   end
