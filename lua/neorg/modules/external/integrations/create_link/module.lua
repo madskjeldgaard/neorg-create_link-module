@@ -9,7 +9,25 @@ module.setup = function()
   }
 end
 
+local function get_visual_selection()
+  local vstart = vim.fn.getpos([['<]])
+  local vend = vim.fn.getpos([['>]])
+  local line_start = vstart[2]
+  local line_end = vend[2]
+  -- or use api.nvim_buf_get_lines
+  local lines = vim.fn.getline(line_start, line_end)
+
+  return table.concat(lines, "\n")
+end
+
 module.create_and_link = function(relativePath)
+  local visuallySelected = false
+
+  -- Use visual selection if relativePath is nil or empty
+  if not relativePath or relativePath == "" then
+    relativePath = get_visual_selection()
+    visuallySelected = true
+  end
 
   -- Parsing folder and filename
   local folderPath, fileName = relativePath:match("^(.-)/([^/]-)$")
@@ -37,7 +55,13 @@ module.create_and_link = function(relativePath)
 
   -- Insert link in current buffer
   local linkText = "{:$/" .. relativePath .. ":}[" .. relativePath .. "]"
-  vim.api.nvim_put({ linkText }, '', true, true)
+
+  if visuallySelected then
+    -- Delete the visual selection
+    vim.cmd("'<,'>d _")
+  end
+
+  vim.api.nvim_put({ linkText }, "c", true, true)
 end
 
 module.load = function()
@@ -46,21 +70,30 @@ end
 
 module.on_event = function(event)
   if event.type == "core.keybinds.events.external.integrations.create_link.create_and_link" then
-    module.required["core.ui"].create_prompt("NeorgCreateAndLink", "Enter Path: ", function(text)
-      -- Close popup
-      vim.cmd("q")
+    -- Check if we have visual selection
+    if vim.fn.mode() == 'v' or vim.fn.mode() == 'V' or vim.fn.mode() == "\\<C-v>" then
+      -- We have visual selection, use it directly
+      local selectedText = get_visual_selection()
+      vim.cmd("normal! <Esc>") -- Exit visual mode
+      module.create_and_link(selectedText)
+    else
+      -- No visual selection, prompt the user for input
+      module.required["core.ui"].create_prompt("NeorgCreateAndLink", "Enter Path: ", function(text)
+        -- Close popup
+        vim.cmd("q")
 
-      -- Create folder, file and insert link
-      module.create_and_link(text)
-    end, {
-      center_x = true,
-      center_y = true,
-    }, {
-      width = 30,
-      height = 1,
-      row = 10,
-      col = 0,
-    })
+        -- Create folder, file and insert link
+        module.create_and_link(text)
+      end, {
+        center_x = true,
+        center_y = true,
+      }, {
+        width = 30,
+        height = 1,
+        row = 10,
+        col = 0,
+      })
+    end
   end
 end
 

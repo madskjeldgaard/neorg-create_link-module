@@ -1,6 +1,6 @@
 # A module for Neorg
 
-This is a module for Neorg that allows you to easily create folders, .norg files, and insert links to these files directly in your Neorg documents using a prompt.
+This is a module for Neorg that allows you to easily create folders, .norg files, and insert links to these files directly in your Neorg documents using a prompt or based on visual selection.
 
 ## Installation
 
@@ -30,7 +30,8 @@ require('neorg').setup({
 This will expose a keymap to the `keymap` part of your neorg setup. Use it like this:
 
 ```lua
--- Prompt for path and create link
-keybinds.map("norg", "n", "<leader>cl", 
+-- When in normal mode and using this keymapping: Prompt for path and create link
+-- When in visual mode and using this keymapping: Create a link from the selected text
+keybinds.map("norg", {"n", "v"}, "<leader>cl", 
     "<cmd>Neorg keybind norg external.integrations.create_link.create_and_link<cr>")
 ```
